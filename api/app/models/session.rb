@@ -24,6 +24,11 @@ class Session < ApplicationRecord
   def active?  = status == 'active'
   def ended?   = status == 'ended'
   def pending? = status == 'pending'
+  def consent_given? = consent_given_at.present?
+
+  def grant_consent!
+    update!(consent_given_at: Time.current)
+  end
 
   def invite_url
     base = ENV.fetch('APP_BASE_URL', 'http://localhost:5173')

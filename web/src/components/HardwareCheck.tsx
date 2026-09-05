@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+    import React, { useEffect, useRef, useState } from "react";
 import { testInternetSpeed, DEFAULT_THRESHOLDS, type InternetSpeedResult } from "@/utils/internetSpeedTest";
 import {
     ProctoringState,
@@ -13,6 +13,7 @@ import { RefreshCw, CheckCircle, XCircle, Loader2, Circle } from "lucide-react";
 
 interface HardwareCheckProps {
     onStart?: () => void;
+    canStart?: boolean;
 }
 
 function StateIcon({ state }: { state: ProctoringState }) {
@@ -34,7 +35,7 @@ function stateLabel(state: ProctoringState) {
 
 const REQUIRE_CAMERA = import.meta.env.VITE_REQUIRE_CAMERA === "true";
 
-const HardwareCheck: React.FC<HardwareCheckProps> = ({ onStart }) => {
+const HardwareCheck: React.FC<HardwareCheckProps> = ({ onStart, canStart }) => {
     const [progress, setProgress] = useState<HardwareCheckingProgress>({
         osAndBrowser: ProctoringState.WAITING,
         internet: ProctoringState.WAITING,
@@ -281,7 +282,7 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({ onStart }) => {
                 <Button
                     size="sm"
                     className="ml-auto"
-                    disabled={!allPassed}
+                    disabled={!allPassed || (canStart !== undefined && !canStart)}
                     onClick={onStart}
                 >
                     Start Interview

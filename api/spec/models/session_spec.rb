@@ -64,4 +64,23 @@ RSpec.describe Session, type: :model do
       expect(session.errors[:status]).to include('is not included in the list')
     end
   end
+
+  describe 'candidate consent' do
+    it 'defaults to not consented' do
+      session = Session.create!(assessment: assessment, status: 'pending')
+      expect(session.consent_given?).to be(false)
+      expect(session.consent_given_at).to be_nil
+    end
+
+    it 'records timestamp and marks consent as given when grant_consent! is called' do
+      session = Session.create!(assessment: assessment, status: 'pending')
+      freeze_time = Time.zone.parse('2026-09-05 10:00:00')
+
+      allow(Time).to receive(:current).and_return(freeze_time)
+      session.grant_consent!
+
+      expect(session.reload.consent_given?).to be(true)
+      expect(session.consent_given_at).to eq(freeze_time)
+    end
+  end
 end

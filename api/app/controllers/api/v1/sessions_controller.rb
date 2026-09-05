@@ -3,8 +3,8 @@
 module Api
   module V1
     class SessionsController < ApiController
-      authorize_auth_token! :assessor, except: %i[candidate_info audio_complete]
-      skip_before_action :require_tenant!, only: %i[candidate_info audio_complete]
+      authorize_auth_token! :assessor, except: %i[candidate_info audio_complete grant_consent]
+      skip_before_action :require_tenant!, only: %i[candidate_info audio_complete grant_consent]
 
       before_action :set_session, only: %i[show end_session coverage transcript]
 
@@ -128,6 +128,17 @@ module Api
         json_response(ended: true, message: "Session ended")
       end
 
+      def grant_consent
+        session = Session.unscoped.find_by(invite_token: params[:token])
+        return json_error("Invalid or expired invite token", :not_found) unless session
+
+        session.grant_consent! unless session.consent_given?
+        json_response(
+          consent_given:    true,
+          consent_given_at: session.consent_given_at
+        )
+      end
+
       # GET /sessions/:token/candidate  — no JWT, invite token in URL
       def candidate_info
         session = Session.unscoped.find_by(invite_token: params[:token])
@@ -146,10 +157,12 @@ module Api
         end
 
         json_response(
-          session_id:      session.id,
-          role_title:      assessment.name,
-          time_limit_min:  assessment.time_limit_min,
-          session_status:  session.status
+          session_id:       session.id,
+          role_title:       assessment.name,
+          time_limit_min:   assessment.time_limit_min,
+          session_status:   session.status,
+          consent_given:    session.consent_given?,
+          consent_given_at: session.consent_given_at
         )
       end
 
