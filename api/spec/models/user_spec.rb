@@ -31,6 +31,12 @@ RSpec.describe User, type: :model do
       expect(user.errors[:role]).to include('is not included in the list')
     end
 
+    it 'is invalid with a password shorter than 6 characters' do
+      user = User.new(email: 'short@example.com', password: '12345', role: 'admin')
+      expect(user).not_to be_valid
+      expect(user.errors[:password]).to include('is too short (minimum is 6 characters)')
+    end
+
     it 'enforces case-insensitive uniqueness of email' do
       User.create!(email: 'recruiter@rakamin.com', password: 'password123', role: 'admin')
       duplicate = User.new(email: 'RECRUITER@RAKAMIN.COM', password: 'password456', role: 'admin')
