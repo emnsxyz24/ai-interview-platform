@@ -121,6 +121,23 @@ RSpec.describe FitGap::Engine do
       expect(comparisons['React']['candidate_level']).to eq(4)
       expect(comparisons['React']['result']).to eq('match')
       expect(comparisons['React']['delta']).to eq(0)
+      expect(comparisons['React']['expected_level']).to eq(4)
+      expect(comparisons['React']['required_level']).to eq(4)
+    end
+
+    it 'handles vacancy with no skills gracefully without validation errors' do
+      empty_vacancy = Vacancy.create!(role_title: 'General Specialist', created_by: 1)
+
+      engine = described_class.new(
+        portfolio: portfolio,
+        vacancy: empty_vacancy,
+        gemini_client: mock_gemini_client
+      )
+
+      report = engine.call
+      expect(report).to be_persisted
+      expect(report.skill_comparisons).to eq([])
+      expect(report.overall_narrative).to include('no required skills configured')
     end
   end
 end

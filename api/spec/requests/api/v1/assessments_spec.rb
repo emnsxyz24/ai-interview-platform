@@ -189,4 +189,41 @@ RSpec.describe 'Assessments API', type: :request do
       expect(assessment.time_limit_min).to eq(60)
     end
   end
+
+  describe 'GET /api/v1/assessments/:assessment_id/sessions' do
+    let!(:assessment) do
+      Current.tenant_id = organization.id
+      Assessment.create!(
+        name: 'Interview Candidate Sessions',
+        time_limit_min: 30,
+        language: 'en',
+        created_by: admin_user.id
+      )
+    end
+
+    before do
+      Current.tenant_id = organization.id
+      3.times do |i|
+        Session.create!(
+          assessment: assessment,
+          candidate_name: "Candidate #{i + 1}",
+          status: 'pending'
+        )
+      end
+    end
+
+    it 'returns paginated sessions list with pagination metadata' do
+      get "/api/v1/assessments/#{assessment.id}/sessions?page=1&per_page=2", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['sessions']).to be_an(Array)
+      expect(body['sessions'].length).to eq(2)
+      expect(body['meta']).to be_present
+      expect(body['meta']['current_page']).to eq(1)
+      expect(body['meta']['total_pages']).to eq(2)
+      expect(body['meta']['total_count']).to eq(3)
+      expect(body['meta']['per_page']).to eq(2)
+    end
+  end
 end

@@ -8,7 +8,10 @@ export const WS_URL = WS_BASE_URL;
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 api.interceptors.request.use((config) => {
@@ -17,8 +20,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Unwrap backend envelope: { data: { ... } } → { ... }
-// On 401/403, clear stored credentials and redirect to login.
 api.interceptors.response.use(
   (response) => {
     if (response.data && typeof response.data === "object" && "data" in response.data) {
