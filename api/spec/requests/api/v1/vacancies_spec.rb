@@ -143,4 +143,38 @@ RSpec.describe 'Vacancies API', type: :request do
       expect(vacancy.reload.role_title).to eq('Principal Engineer')
     end
   end
+
+  describe 'GET /api/v1/vacancies' do
+    before do
+      Current.tenant_id = organization.id
+      15.times do |i|
+        Vacancy.create!(
+          role_title: "Role #{i + 1}",
+          created_by: admin_user.id
+        )
+      end
+    end
+
+    it 'returns paginated vacancies by default' do
+      get '/api/v1/vacancies', headers: headers
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['vacancies'].length).to eq(10)
+      expect(body['meta']['total_count']).to eq(15)
+      expect(body['meta']['total_pages']).to eq(2)
+      expect(body['meta']['current_page']).to eq(1)
+    end
+
+    it 'returns all vacancies when ?all=true is requested' do
+      get '/api/v1/vacancies?all=true', headers: headers
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['vacancies'].length).to eq(15)
+      expect(body['meta']['total_count']).to eq(15)
+      expect(body['meta']['total_pages']).to eq(1)
+      expect(body['meta']['current_page']).to eq(1)
+    end
+  end
 end
