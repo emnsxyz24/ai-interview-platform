@@ -16,7 +16,7 @@ export interface Assessment {
 
 export interface AssessmentSkill {
   id?: number;
-  skill_id?: number;
+  skill_id?: string;
   skill_label: string;
   is_custom: boolean;
   expected_level: number;
@@ -49,7 +49,7 @@ export interface Session {
 
 export interface CoverageSkill {
   id: number;
-  skill_id: number;
+  skill_id?: string;
   skill_label: string;
   is_discovered: boolean;
   state: "not_yet" | "initiated" | "partial" | "covered";
@@ -87,7 +87,7 @@ export interface Portfolio {
 
 export interface PortfolioSkill {
   id: number;
-  skill_id?: number;
+  skill_id?: string;
   skill_label: string;
   is_discovered: boolean;
   ai_level: string;       // "L1" | "L2" | "L3" | "L4" | "L5"
@@ -119,9 +119,14 @@ export interface Vacancy {
 
 export interface VacancySkill {
   id?: number;
-  skill_id?: number;
+  skill_id?: string;
   skill_label: string;
   expected_level: number;
+  l1_anchor?: string;
+  l2_anchor?: string;
+  l3_anchor?: string;
+  l4_anchor?: string;
+  l5_anchor?: string;
   _destroy?: boolean;
 }
 
