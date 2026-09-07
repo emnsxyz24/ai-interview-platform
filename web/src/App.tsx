@@ -33,6 +33,7 @@ export default function App() {
         <Route path="/assessments/new" element={<AssessmentNewPage />} />
         <Route path="/assessments/:id/edit" element={<AssessmentEditPage />} />
         <Route path="/assessments/:id/invite" element={<AssessmentInvitePage />} />
+        <Route path="/assessments/:id" element={<Navigate to="invite" replace />} />
         <Route
           path="/assessments/:id/sessions/:sessionId/monitor"
           element={<LiveMonitorPage />}

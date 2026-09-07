@@ -117,7 +117,7 @@ export default function AssessmentNewPage() {
       };
       const res = await assessmentsApi.create(payload);
       const created = res.data.assessment;
-      navigate(`/assessments/${created.id}`);
+      navigate(`/assessments/${created.id}/invite`);
     } catch (err: any) {
       setError(err?.response?.data?.errors?.[0]?.message || "Failed to create assessment");
     } finally {
