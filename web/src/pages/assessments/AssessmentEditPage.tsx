@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
@@ -34,6 +35,7 @@ export default function AssessmentEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
@@ -59,7 +61,7 @@ export default function AssessmentEditPage() {
           skills: a.skills,
         });
       })
-      .catch(() => {})
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [id, reset]);
 
@@ -113,8 +115,15 @@ export default function AssessmentEditPage() {
         assessment_skills_attributes: data.skills.map((s, i) => ({ ...s, display_order: i })),
       });
       navigate(`/assessments/${id}/invite`);
-    } catch (e: any) {
-      setError(e?.response?.data?.errors?.[0]?.message ?? "Failed to save.");
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        const msg = e.response?.data?.errors?.[0]?.message;
+        if (typeof msg === "string") {
+          setError(msg);
+          return;
+        }
+      }
+      setError("Failed to save.");
     } finally {
       setSubmitting(false);
     }
@@ -130,6 +139,21 @@ export default function AssessmentEditPage() {
       </div>
     );
   }
+  if (loadError) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-4">
+        <div className="border border-destructive/40 rounded-lg p-6 text-center space-y-3">
+          <p className="text-sm text-destructive font-medium">
+            Assessment not found or failed to load.
+          </p>
+          <Button variant="outline" size="sm" onClick={() => navigate("/assessments")}>
+            Back to Assessments
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="max-w-2xl mx-auto">

@@ -187,9 +187,6 @@ export default function InterviewPage() {
     setInterviewState("connecting");
     connect();
     await startCapture();
-    // Start muted — only unmute when backend sends speaker_changed: candidate.
-    // This prevents mic audio from being sent during AI speech, since separate
-    // AudioContexts for capture/playback break the browser's echo cancellation.
     muteRef.current?.();
   }, [sessionId, connect, startCapture]);
 
@@ -209,8 +206,13 @@ export default function InterviewPage() {
       : connectionState === "connected"
       ? "connected"
       : "reconnecting";
- 
-  // ── State A: Pre-start ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (interviewState === "complete") {
+      stopCapture();
+      stopPlayback();
+    }
+  }, [interviewState, stopCapture, stopPlayback]);
   if (interviewState === "idle") {
     if (!consentSubmitted) {
       return (
@@ -461,7 +463,7 @@ export default function InterviewPage() {
           </AlertDialogContent>
         </AlertDialog>
         {import.meta.env.DEV && (
-          <Button variant="outline" size="sm" className="text-xs opacity-50"
+          <Button variant="outline" size="sm" className="text-xs"
             onClick={() => sendJson({ type: "debug_force_reconnect" })}>
             ⚡ Force reconnect
           </Button>

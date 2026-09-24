@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useSetAtom } from "jotai";
 import { authAtom, saveToken, saveUser } from "@/stores/authAtom";
@@ -30,12 +31,21 @@ export default function SignupPage() {
       if (user) saveUser(user);
       setAuth({ token, user: user ?? null });
       navigate("/assessments");
-    } catch {
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const msg = err.response?.data?.errors?.[0]?.message;
+        if (typeof msg === "string") {
+          setError(msg);
+          return;
+        }
+      }
       setError("Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  const isPasswordError = Boolean(error && error.toLowerCase().includes("password"));
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -89,7 +99,7 @@ export default function SignupPage() {
                   )}
                 </Button>
               </div>
-              <p className={`text-xs ${error ? 'text-red-600' : 'text-muted-foreground'}`}>Must be at least 6 characters</p>
+              <p className={`text-xs ${isPasswordError ? "text-destructive" : "text-muted-foreground"}`}>Must be at least 6 characters</p>
             </div>
 
             {error && (
