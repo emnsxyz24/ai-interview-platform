@@ -136,16 +136,23 @@ export default function VacancyEditPage() {
       <SkillPicker
         open={pickerOpen}
         onOpenChange={setPickerOpen}
-        onSelect={(s) => append({
-          skill_id: s.skill_id,
-          skill_label: s.skill_label,
-          expected_level: 3,
-          l1_anchor: s.l1_anchor,
-          l2_anchor: s.l2_anchor,
-          l3_anchor: s.l3_anchor,
-          l4_anchor: s.l4_anchor,
-          l5_anchor: s.l5_anchor,
-        })}
+        onSelect={(s) => {
+          const isDuplicate = fields.some(
+            (f) => (f.skill_id && f.skill_id === s.skill_id) || f.skill_label?.toLowerCase() === s.skill_label?.toLowerCase()
+          );
+          if (isDuplicate) return;
+          append({
+            skill_id: s.skill_id,
+            skill_label: s.skill_label,
+            expected_level: 3,
+            l1_anchor: s.l1_anchor,
+            l2_anchor: s.l2_anchor,
+            l3_anchor: s.l3_anchor,
+            l4_anchor: s.l4_anchor,
+            l5_anchor: s.l5_anchor,
+          });
+        }}
+        existingSkillIds={fields.map((f) => f.skill_id).filter(Boolean) as string[]}
       />
     </div>
   );

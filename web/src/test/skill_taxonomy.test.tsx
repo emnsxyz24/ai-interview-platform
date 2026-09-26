@@ -272,6 +272,36 @@ describe("SkillPicker", () => {
     });
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+  it("renders disabled Added button when skill is already present in existingSkillIds", async () => {
+    vi.spyOn(skillTaxonomiesApi, "list").mockResolvedValue({
+      data: { skill_taxonomies: mockTaxonomySkills },
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config: {} as never,
+    });
+
+    const onSelect = vi.fn();
+
+    render(
+      <SkillPicker
+        open={true}
+        onOpenChange={vi.fn()}
+        onSelect={onSelect}
+        existingSkillIds={["SK-ENG-001"]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("React Frontend Core")).toBeInTheDocument();
+    });
+
+    const addedButton = screen.getByRole("button", { name: /added/i });
+    expect(addedButton).toBeDisabled();
+
+    fireEvent.click(addedButton);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });
 
 describe("SkillCard", () => {

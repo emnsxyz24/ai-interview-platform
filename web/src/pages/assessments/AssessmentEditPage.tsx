@@ -250,7 +250,14 @@ export default function AssessmentEditPage() {
       <SkillPicker
         open={pickerOpen}
         onOpenChange={setPickerOpen}
-        onSelect={(s) => append({ ...s, display_order: fields.length })}
+        onSelect={(s) => {
+          const isDuplicate = fields.some(
+            (f) => (f.skill_id && f.skill_id === s.skill_id) || (f.skill_label && f.skill_label.toLowerCase() === s.skill_label?.toLowerCase())
+          );
+          if (isDuplicate) return;
+          append({ ...s, display_order: fields.length });
+        }}
+        existingSkillIds={fields.map((f) => f.skill_id).filter(Boolean) as string[]}
       />
 
       <CustomSkillDialog

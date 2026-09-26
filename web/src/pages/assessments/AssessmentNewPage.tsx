@@ -95,6 +95,10 @@ export default function AssessmentNewPage() {
   };
 
   const addB7Skill = (skill: Partial<AssessmentSkill>) => {
+    const isDuplicate = fields.some(
+      (f) => (f.skill_id && f.skill_id === skill.skill_id) || (f.skill_label && f.skill_label.toLowerCase() === skill.skill_label?.toLowerCase())
+    );
+    if (isDuplicate) return;
     append({ ...skill, display_order: fields.length });
   };
 
@@ -277,6 +281,7 @@ export default function AssessmentNewPage() {
         open={pickerOpen}
         onOpenChange={setPickerOpen}
         onSelect={addB7Skill}
+        existingSkillIds={fields.map((f) => f.skill_id).filter(Boolean) as string[]}
       />
 
       <CustomSkillDialog

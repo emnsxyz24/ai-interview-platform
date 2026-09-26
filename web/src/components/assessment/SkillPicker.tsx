@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, ChevronDown, ChevronUp, Plus, Info } from "lucide-react";
+import { Search, Loader2, ChevronDown, ChevronUp, Plus, Info, Check } from "lucide-react";
 import { skillTaxonomiesApi } from "@/services/skillTaxonomies";
 import type { AssessmentSkill, SkillTaxonomy } from "@/types";
 
@@ -15,6 +15,7 @@ interface SkillPickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (skill: Partial<AssessmentSkill>) => void;
+  existingSkillIds?: string[];
 }
 
 const CATEGORIES = [
@@ -24,7 +25,7 @@ const CATEGORIES = [
   { id: "product_process", label: "Product & Process" },
 ] as const;
 
-export default function SkillPicker({ open, onOpenChange, onSelect }: SkillPickerProps) {
+export default function SkillPicker({ open, onOpenChange, onSelect, existingSkillIds = [] }: SkillPickerProps) {
   const [skills, setSkills] = useState<SkillTaxonomy[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -51,6 +52,7 @@ export default function SkillPicker({ open, onOpenChange, onSelect }: SkillPicke
   });
 
   const handleSelect = (s: SkillTaxonomy) => {
+    if (existingSkillIds.includes(s.skill_id)) return;
     onSelect({
       skill_id: s.skill_id,
       skill_label: s.skill_label,
@@ -121,6 +123,7 @@ export default function SkillPicker({ open, onOpenChange, onSelect }: SkillPicke
           ) : (
             filtered.map((s) => {
               const isExpanded = expandedSkillId === s.skill_id;
+              const isAdded = existingSkillIds.includes(s.skill_id);
               return (
                 <div
                   key={s.skill_id}
@@ -157,15 +160,28 @@ export default function SkillPicker({ open, onOpenChange, onSelect }: SkillPicke
                         )}
                       </Button>
 
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="h-8 text-xs"
-                        onClick={() => handleSelect(s)}
-                      >
-                        <Plus className="h-3.5 w-3.5 mr-1" />
-                        Add
-                      </Button>
+                      {isAdded ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="h-8 text-xs opacity-75 cursor-not-allowed"
+                          disabled
+                        >
+                          <Check className="h-3.5 w-3.5 mr-1 text-green-600" />
+                          Added
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-8 text-xs"
+                          onClick={() => handleSelect(s)}
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          Add
+                        </Button>
+                      )}
                     </div>
                   </div>
 
